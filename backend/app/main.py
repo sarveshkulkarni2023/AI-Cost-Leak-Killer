@@ -28,8 +28,12 @@ app.add_middleware(
 # Initialize database
 @app.on_event("startup")
 async def startup_event():
-    init_db()
-    logger.info("Database initialized")
+    try:
+        init_db()
+        logger.info("Database initialized successfully")
+    except Exception as e:
+        logger.warning(f"Database initialization warning: {e}")
+        logger.info("App will continue with potential database issues")
 
 # Include routers
 app.include_router(upload.router)

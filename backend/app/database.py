@@ -7,11 +7,19 @@ from sqlalchemy.orm import sessionmaker
 # Database URL from environment or default SQLite
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./cost_leak_killer.db")
 
-# Create engine with SQLite specific options
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"check_same_thread": False} if "sqlite" in DATABASE_URL else {},
-)
+# Create engine with proper options for SQLite and PostgreSQL
+if "sqlite" in DATABASE_URL:
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={"check_same_thread": False},
+    )
+else:
+    # For PostgreSQL and other databases
+    engine = create_engine(
+        DATABASE_URL,
+        pool_pre_ping=True,  # Verify connections before using
+        pool_recycle=3600,   # Recycle connections every hour
+    )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
