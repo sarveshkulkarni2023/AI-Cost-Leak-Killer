@@ -5,7 +5,8 @@ from typing import Dict, List, Any
 import json
 import os
 
-API_BASE_URL = "http://localhost:8000/api"
+# Default API URL - will be overridden by environment or Railway's internal networking
+DEFAULT_API_URL = "http://localhost:8000/api"
 
 
 class APIClient:
@@ -13,19 +14,25 @@ class APIClient:
 
     @staticmethod
     def get_base_url() -> str:
-        """Get API base URL from environment or default."""
-        # Try environment variable first, then secrets, then default
+        """Get API base URL with Railway support."""
+        # 1. Check Railway_assigned backend service URL (when deployed together)
+        if "BACKEND_URL" in os.environ:
+            url = os.environ.get("BACKEND_URL")
+            return f"{url}/api" if url.endswith("/api") is False else url
+        
+        # 2. Check environment variable
         if "API_BASE_URL" in os.environ:
             return os.environ["API_BASE_URL"]
         
-        # Check if secrets are available and configured
+        # 3. Check Streamlit secrets
         try:
-            if hasattr(st, 'secrets') and st.secrets:
-                return st.secrets.get("API_BASE_URL", API_BASE_URL)
+            if hasattr(st, 'secrets') and 'API_BASE_URL' in st.secrets:
+                return st.secrets["API_BASE_URL"]
         except (AttributeError, FileNotFoundError):
             pass
         
-        return API_BASE_URL
+        # 4. Default fallback
+        return DEFAULT_API_URL
 
     @staticmethod
     def upload_csv(file) -> Dict[str, Any]:
