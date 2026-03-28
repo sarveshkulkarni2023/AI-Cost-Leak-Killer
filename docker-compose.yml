@@ -28,9 +28,15 @@ services:
       STREAMLIT_SERVER_HEADLESS: true
       STREAMLIT_SERVER_PORT: 8501
       STREAMLIT_SERVER_ADDRESS: 0.0.0.0
+<<<<<<< HEAD
       BACKEND_URL: ${BACKEND_URL:-http://backend:8000}
     depends_on:
       - backend
+=======
+      BACKEND_URL: http://backend:8000
+    depends_on:
+      - backend   # ✅ ONLY THIS DIRECTION
+>>>>>>> f6d838db62dbe68cee28c9b2a9651014550b1e53
     networks:
       - cost-network
     restart: always
